@@ -4,7 +4,7 @@ FROM php:8.2-fpm-alpine AS builder
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_NO_INTERACTION=1
 
-# Install dependencies
+# Install build dependencies
 RUN apk add --no-cache \
     curl \
     git \
@@ -15,6 +15,11 @@ RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
+    zlib-dev \
+    gcc \
+    g++ \
+    make \
+    bash \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_pgsql
 
@@ -39,24 +44,22 @@ ENV APP_ENV=production \
 # Install runtime dependencies
 RUN apk add --no-cache \
     postgresql-client \
-    postgresql-dev \
     libpng \
     libjpeg-turbo \
     freetype \
+    zlib \
     nginx \
     supervisor \
-    bash \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_pgsql opcache
+    bash
+
+# Copy PHP built extensions from builder
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=builder /app/vendor /app/vendor
 
 # Create app user
 RUN addgroup -g 1000 laravel && adduser -D -u 1000 -G laravel laravel
 
 WORKDIR /app
-
-# Copy PHP built dependencies from builder
-COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=builder /app/vendor /app/vendor
 
 # Copy application files
 COPY --chown=laravel:laravel . .
@@ -71,15 +74,15 @@ RUN mkdir -p \
     /app/public/images && \
     chown -R laravel:laravel /app/storage /app/bootstrap
 
-# Configure PHP
+# Configure PHP (placeholder files)
 COPY docker/php/php.ini $PHP_INI_DIR/conf.d/99-custom.ini
 COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 
-# Configure Nginx
+# Configure Nginx (placeholder files)
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Configure Supervisor
+# Configure Supervisor (placeholder file)
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Generate application key and cache
