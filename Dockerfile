@@ -1,24 +1,26 @@
-# Stage 1 - Builder
+# -----------------------------
+# Stage 1: Builder
+# -----------------------------
 FROM php:8.2-fpm-alpine AS builder
 
-ENV COMPOSER_ALLOW_SUPERUSER=1 \
-    COMPOSER_NO_INTERACTION=1
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_NO_INTERACTION=1
 
-# Install build dependencies
+# Build dependencies
 RUN apk add --no-cache \
-        curl \
-        git \
-        zip \
-        unzip \
-        postgresql-dev \
-        libpng-dev \
-        libjpeg-turbo-dev \
-        freetype-dev \
-        zlib-dev \
-        gcc \
-        g++ \
-        make \
-        bash \
+    curl \
+    git \
+    zip \
+    unzip \
+    bash \
+    gcc \
+    g++ \
+    make \
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zlib-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_pgsql
 
@@ -27,11 +29,15 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copy composer files and install
+# Copy composer files
 COPY composer.json composer.lock ./
+
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Stage 2 - Runtime
+# -----------------------------
+# Stage 2: Final Image
+# -----------------------------
 FROM php:8.2-fpm-alpine
 
 ENV APP_ENV=production \
@@ -40,52 +46,51 @@ ENV APP_ENV=production \
 
 # Runtime dependencies
 RUN apk add --no-cache \
-        postgresql-client \
-        libpng \
-        libjpeg-turbo \
-        freetype \
-        zlib \
-        nginx \
-        supervisor \
-        bash \
-    && docker-php-ext-install pdo pdo_pgsql gd
+    postgresql-client \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    zlib \
+    nginx \
+    supervisor \
+    bash \
+    && rm -rf /var/cache/apk/*
+
+# Copy PHP extensions and vendor from builder
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=builder /app/vendor /app/vendor
 
 # Create app user
 RUN addgroup -g 1000 laravel && adduser -D -u 1000 -G laravel laravel
 
 WORKDIR /app
 
-# Copy built PHP extensions and vendor
-COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=builder /app/vendor /app/vendor
-
 # Copy app code
 COPY --chown=laravel:laravel . .
 
-# Storage & bootstrap permissions
+# Create necessary directories
 RUN mkdir -p \
-        /app/storage/logs \
-        /app/storage/framework/cache \
-        /app/storage/framework/sessions \
-        /app/storage/framework/views \
-        /app/bootstrap/cache \
-        /app/public/images && \
-    chown -R laravel:laravel /app/storage /app/bootstrap && \
-    chmod -R 755 /app/storage /app/bootstrap
+    storage/logs \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache \
+    public/images && \
+    chown -R laravel:laravel storage bootstrap
 
-# PHP, Nginx, Supervisor configs
+# PHP & Nginx config (placeholder, kendi config dosyalarını kullanabilirsin)
 COPY docker/php/php.ini $PHP_INI_DIR/conf.d/99-custom.ini
 COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Generate app key & cache (ignore errors)
+# Generate key and cache configs
 USER laravel
-RUN php artisan key:generate --force || true && \
-    php artisan config:cache || true && \
-    php artisan route:cache || true && \
-    php artisan view:cache || true
+RUN php artisan key:generate --force && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
 EXPOSE 80 9000
 
