@@ -1,0 +1,260 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="{{ route('admin.scanner-users.index') }}"
+                   style="background-color: #6b7280; color: white; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center;"
+                   onmouseover="this.style.backgroundColor='#4b5563'"
+                   onmouseout="this.style.backgroundColor='#6b7280'">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Geri Dön
+                </a>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                    Scanner Kullanıcı Detayları
+                </h2>
+            </div>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Başarı Mesajı -->
+            @if(session('success'))
+            <div class="mb-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded-lg">
+                <div class="flex">
+                    <svg class="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-sm font-medium text-green-700 dark:text-green-300">{{ session('success') }}</p>
+                </div>
+            </div>
+            @endif
+
+            <div style="display: grid; grid-template-columns: 400px 1fr; gap: 24px;">
+                <!-- Sol Taraf - Profil Kartı -->
+                <div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                        <!-- Header Gradient -->
+                        <div style="position: relative; height: 160px; background: {{ $scannerUser->is_active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)' }};">
+                            <div class="absolute inset-0 bg-black/10"></div>
+                            
+                            <!-- Status Badge -->
+                            <div style="position: absolute; top: 12px; right: 12px; z-index: 10;">
+                                <span style="display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; {{ $scannerUser->is_active ? 'background-color: #10b981; color: white;' : 'background-color: #ef4444; color: white;' }}">
+                                    @if($scannerUser->is_active)
+                                        <svg style="width: 12px; height: 12px; margin-right: 4px;" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Aktif
+                                    @else
+                                        <svg style="width: 12px; height: 12px; margin-right: 4px;" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Pasif
+                                    @endif
+                                </span>
+                            </div>
+
+                            <!-- Avatar -->
+                            <div style="position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); z-index: 10;">
+                                <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 700; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                    {{ strtoupper(substr($scannerUser->full_name, 0, 1)) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Info -->
+                        <div class="pt-14 px-6 pb-6 text-center">
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                                {{ $scannerUser->full_name }}
+                            </h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                @{{ $scannerUser->username }}
+                            </p>
+
+                            <!-- Stats -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 12px; color: white;">
+                                    <div style="font-size: 28px; font-weight: 800;">{{ $scannerUser->scan_count }}</div>
+                                    <div style="font-size: 11px; opacity: 0.9; margin-top: 4px;">Toplam Tarama</div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 16px; border-radius: 12px; color: white;">
+                                    <div style="font-size: 28px; font-weight: 800;">{{ $scannerUser->created_at->diffInDays(now()) }}</div>
+                                    <div style="font-size: 11px; opacity: 0.9; margin-top: 4px;">Gün Önce</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Details -->
+                        <div style="border-top: 1px solid #e5e7eb; padding: 20px;">
+                            <h4 style="font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; margin-bottom: 12px;">Hesap Bilgileri</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-sm">
+                                    <svg class="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">Kayıt Tarihi</div>
+                                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $scannerUser->created_at->format('d.m.Y H:i') }}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <svg class="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">Son Güncelleme</div>
+                                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $scannerUser->updated_at->format('d.m.Y H:i') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <a href="{{ route('admin.scanner-users.edit', $scannerUser) }}"
+                           style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; font-weight: 700; font-size: 13px; text-align: center; text-decoration: none; transition: all 0.3s;"
+                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(102, 126, 234, 0.4)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                            <svg style="width: 14px; height: 14px; display: inline; margin-right: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Düzenle
+                        </a>
+                        <form action="{{ route('admin.scanner-users.destroy', $scannerUser) }}" method="POST" style="flex: 1;" onsubmit="return confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    style="width: 100%; padding: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(245, 87, 108, 0.4)';"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <svg style="width: 14px; height: 14px; display: inline; margin-right: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sağ Taraf - Detaylı Bilgiler -->
+                <div class="space-y-6">
+                    <!-- Kullanıcı Bilgileri -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px;">
+                            <h3 style="color: white; font-size: 16px; font-weight: 700; display: flex; align-items: center;">
+                                <svg style="width: 20px; height: 20px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                                Kullanıcı Bilgileri
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 12px;">
+                                <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Kullanıcı ID:</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-100 font-mono">#{{ $scannerUser->id }}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 12px;">
+                                <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Ad Soyad:</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $scannerUser->full_name }}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 12px;">
+                                <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Kullanıcı Adı:</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-100">@{{ $scannerUser->username }}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 12px;">
+                                <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Durum:</span>
+                                <span>
+                                    @if($scannerUser->is_active)
+                                        <span style="display: inline-flex; align-items: center; padding: 4px 12px; background-color: #d1fae5; color: #065f46; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                            <span style="width: 6px; height: 6px; background-color: #10b981; border-radius: 50%; margin-right: 6px;"></span>
+                                            Aktif
+                                        </span>
+                                    @else
+                                        <span style="display: inline-flex; align-items: center; padding: 4px 12px; background-color: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                            <span style="width: 6px; height: 6px; background-color: #ef4444; border-radius: 50%; margin-right: 6px;"></span>
+                                            Pasif
+                                        </span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarama İstatistikleri -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 16px;">
+                            <h3 style="color: white; font-size: 16px; font-weight: 700; display: flex; align-items: center;">
+                                <svg style="width: 20px; height: 20px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                                </svg>
+                                Tarama İstatistikleri
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-radius: 12px;">
+                                    <div style="font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                        {{ $scannerUser->scan_count }}
+                                    </div>
+                                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-top: 8px;">Toplam Tarama</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%); border-radius: 12px;">
+                                    <div style="font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                        {{ $scannerUser->created_at->diffInDays(now()) }}
+                                    </div>
+                                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-top: 8px;">Gün Önce</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #4ade8015 0%, #10b98115 100%); border-radius: 12px;">
+                                    <div style="font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #4ade80 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                        {{ $scannerUser->scan_count > 0 ? round($scannerUser->scan_count / max($scannerUser->created_at->diffInDays(now()), 1), 1) : 0 }}
+                                    </div>
+                                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-top: 8px;">Günlük Ortalama</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarihçe -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                        <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); padding: 16px;">
+                            <h3 style="color: white; font-size: 16px; font-weight: 700; display: flex; align-items: center;">
+                                <svg style="width: 20px; height: 20px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                </svg>
+                                Zaman Çizelgesi
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-start">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg style="width: 20px; height: 20px; color: white;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Hesap Oluşturuldu</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $scannerUser->created_at->format('d.m.Y H:i') }} - {{ $scannerUser->created_at->diffForHumans() }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg style="width: 20px; height: 20px; color: white;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Son Güncelleme</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $scannerUser->updated_at->format('d.m.Y H:i') }} - {{ $scannerUser->updated_at->diffForHumans() }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

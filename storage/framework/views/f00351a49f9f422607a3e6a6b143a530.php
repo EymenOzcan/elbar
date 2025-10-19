@@ -1,0 +1,2 @@
+<img src="<?php echo e(asset('images/el-bar-logo.png')); ?>" <?php echo e($attributes); ?> style="filter: brightness(1.2) contrast(1.3);" />
+<?php /**PATH /Users/eymenozcan/el-bar---/resources/views/components/application-logo.blade.php ENDPATH**/ ?>
