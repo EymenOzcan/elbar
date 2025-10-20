@@ -19,6 +19,8 @@ RUN apk add --no-cache \
     g++ \
     make \
     bash \
+    nodejs \
+    npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql pdo_pgsql
 
@@ -27,8 +29,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+# Copy package files for npm
+COPY package*.json ./
+
+# Install npm dependencies
+RUN npm install
+
+# Copy composer files
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Copy application files
+COPY . .
+
+# Build frontend assets
+RUN npm run build
 
 # Stage 2 - Final image
 FROM php:8.2-fpm-alpine
@@ -54,6 +69,7 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 COPY --from=builder /app/vendor /app/vendor
+COPY --from=builder /app/public/build /app/public/build
 
 # App user
 RUN addgroup -g 1000 laravel && adduser -D -u 1000 -G laravel laravel
