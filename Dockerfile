@@ -65,6 +65,8 @@ RUN mkdir -p /app/storage/logs \
     /app/storage/framework/{cache,sessions,views} \
     /app/bootstrap/cache \
     /app/public/images \
+    /var/log/supervisor \
+    /var/log/nginx \
     && chown -R laravel:laravel /app/storage /app/bootstrap /app/public \
     && chmod -R 775 /app/storage /app/bootstrap/cache /app/public
 
