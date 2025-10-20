@@ -46,9 +46,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     bash \
-    netcat-openbsd \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql gd
+    netcat-openbsd
 
 WORKDIR /app
 
